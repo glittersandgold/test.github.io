@@ -6,6 +6,8 @@ const ctx = canvas.getContext('2d');
 let snake = [{ x: 200, y: 200 }];
 let dx = 10;
 let dy = 0;
+// Add score variable
+let score = 0;
 
 // Food properties
 let food = { x: 0, y: 0 };
@@ -17,6 +19,7 @@ function gameLoop() {
         moveSnake();
         drawFood();
         drawSnake();
+        drawScore(); // Add this line to draw the score
         checkCollision();
         gameLoop();
     }, 100);
@@ -34,9 +37,17 @@ function moveSnake() {
     snake.unshift(head);
     if (head.x === food.x && head.y === food.y) {
         generateFood();
+        score += 10; // Increase score when food is eaten
     } else {
         snake.pop();
     }
+}
+
+// Add function to draw score
+function drawScore() {
+    ctx.fillStyle = 'black';
+    ctx.font = '20px Arial';
+    ctx.fillText('Score: ' + score, 10, 30);
 }
 
 // Draw the snake
@@ -78,7 +89,9 @@ function resetGame() {
     dx = 10;
     dy = 0;
     generateFood();
+    score = 0; // Reset score when game resets
 }
+
 
 // Handle keyboard input
 document.addEventListener('keydown', (e) => {
