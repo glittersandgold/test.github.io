@@ -2,27 +2,27 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Snake properties
+// Game state
 let snake = [{ x: 200, y: 200 }];
 let dx = 10;
 let dy = 0;
-// Add score variable
-let score = 0;
-
-// Food properties
 let food = { x: 0, y: 0 };
+let score = 0;
+let gameSpeed = 100;
+let isPaused = false;
 
 // Game loop
 function gameLoop() {
-    setTimeout(() => {
+    if (!isPaused) {
         clearCanvas();
         moveSnake();
         drawFood();
         drawSnake();
-        drawScore(); // Add this line to draw the score
+        drawScore();
         checkCollision();
-        gameLoop();
-    }, 100);
+    }
+    drawPauseState();
+    setTimeout(gameLoop, gameSpeed);
 }
 
 // Clear the canvas
@@ -37,17 +37,10 @@ function moveSnake() {
     snake.unshift(head);
     if (head.x === food.x && head.y === food.y) {
         generateFood();
-        score += 10; // Increase score when food is eaten
+        score += 10;
     } else {
         snake.pop();
     }
-}
-
-// Add function to draw score
-function drawScore() {
-    ctx.fillStyle = 'black';
-    ctx.font = '20px Arial';
-    ctx.fillText('Score: ' + score, 10, 30);
 }
 
 // Draw the snake
@@ -70,6 +63,25 @@ function drawFood() {
     ctx.fillRect(food.x, food.y, 10, 10);
 }
 
+// Draw score
+function drawScore() {
+    ctx.fillStyle = 'black';
+    ctx.font = '20px Arial';
+    ctx.fillText('Score: ' + score, 10, 30);
+}
+
+// Draw pause state
+function drawPauseState() {
+    if (isPaused) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white';
+        ctx.font = '30px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
+    }
+}
+
 // Check for collisions
 function checkCollision() {
     const head = snake[0];
@@ -88,18 +100,28 @@ function resetGame() {
     snake = [{ x: 200, y: 200 }];
     dx = 10;
     dy = 0;
+    score = 0;
     generateFood();
-    score = 0; // Reset score when game resets
+    isPaused = false;
 }
 
+// Toggle pause
+function togglePause() {
+    isPaused = !isPaused;
+}
 
 // Handle keyboard input
 document.addEventListener('keydown', (e) => {
-    switch (e.key) {
-        case 'ArrowUp': dx = 0; dy = -10; break;
-        case 'ArrowDown': dx = 0; dy = 10; break;
-        case 'ArrowLeft': dx = -10; dy = 0; break;
-        case 'ArrowRight': dx = 10; dy = 0; break;
+    if (!isPaused) {
+        switch (e.key) {
+            case 'ArrowUp': if (dy === 0) { dx = 0; dy = -10; } break;
+            case 'ArrowDown': if (dy === 0) { dx = 0; dy = 10; } break;
+            case 'ArrowLeft': if (dx === 0) { dx = -10; dy = 0; } break;
+            case 'ArrowRight': if (dx === 0) { dx = 10; dy = 0; } break;
+        }
+    }
+    if (e.code === 'Space') {
+        togglePause();
     }
 });
 
